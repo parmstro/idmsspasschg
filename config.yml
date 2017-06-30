@@ -4,22 +4,21 @@
 # parmstro@redhat.com
 # 2017-06-28
 #
-
 - hosts: localhost
-	vars:
-	  httpd_port: 80
-	  httpd_ssl_port: 443
-	  proxy_target_fqdn: idm.parmstrong.ca
-	  proxy_referrer_fqdn: someserver.parmstrong.ca
-	  proxy_referrer_fqdn_match: someserver\.parmstrong\.ca
-	  
-	remote_user: root
+  vars:
+    httpd_port: 80
+    httpd_ssl_port: 443
+    proxy_target_fqdn: idm.parmstrong.ca
+    proxy_referrer_fqdn: someserver.parmstrong.ca
+    proxy_referrer_fqdn_match: someserver\.parmstrong\.ca
+
+  remote_user: root
 
   tasks:
   - name: Configure httpd server
-  	blockinfile:
-  	  path: /etc/httpd/conf.d/ssl.conf
-  	  marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    blockinfile:
+      path: /etc/httpd/conf.d/ssl.conf
+      marker: "# {mark} ANSIBLE MANAGED BLOCK"
       insertbefore: "</VirtualHost>"
       content: |
         # add the following directives
