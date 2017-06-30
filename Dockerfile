@@ -21,7 +21,7 @@ COPY ./config.yml  /tmp/config.yml
 
 RUN yum repolist --disablerepo=* && \
     yum-config-manager --disable \* > /dev/null && \
-    yum-config-manager --enable rhel-7-server-rpms --enable epel > /dev/null && \
+    yum-config-manager --enable rhel-7-server-rpms --enable epel --enable rhel-7-server-optional-rpms > /dev/null && \
     yum -y install wget && \
     wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     yum -y localinstall epel-release-latest-7.noarch.rpm && \
