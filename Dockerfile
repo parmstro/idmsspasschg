@@ -12,7 +12,7 @@ FROM registry.access.redhat.com/rhel7:latest
 
 # its from me
 LABEL maintainedby="Paul Armstrong" \
-      version="0.2" \
+      version="0.3" \
       release-date="2017-06-28"
 
 
@@ -25,7 +25,7 @@ RUN yum repolist --disablerepo=* && \
     yum -y install wget && \
     wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     yum -y localinstall epel-release-latest-7.noarch.rpm && \
-    yum -y install httpd mod_ssl mod_proxy mod_proxy_balancer ansible && \
+    yum -y install httpd mod_ssl mod_proxy_html mod_proxy_balancer ansible && \
     yum -y update
 
 
