@@ -22,6 +22,8 @@
       insertbefore: "</VirtualHost>"
       content: |
         # add the following directives
+        SSLProxyEngine On
+        RequestHeader set Front-End-Https "On"
         ProxyPass / https://{{ proxy_target_fqdn }}/
         ProxyPassReverse / https://{{ proxy_target_fqdn }}/
         ProxyPassReverseCookieDomain {{ proxy_target_fqdn }} {{ proxy_referrer_fqdn }}
