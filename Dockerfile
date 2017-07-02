@@ -12,7 +12,7 @@ FROM registry.access.redhat.com/rhel7:latest
 
 # its from me
 LABEL maintainedby="Paul Armstrong" \
-      version="0.4" \
+      version="0.5" \
       release-date="2017-06-28"
 
 

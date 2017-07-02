@@ -9,8 +9,8 @@
     httpd_port: 80
     httpd_ssl_port: 443
     proxy_target_fqdn: idm.parmstrong.ca
-    proxy_referrer_fqdn: someserver.parmstrong.ca
-    proxy_referrer_fqdn_match: someserver\.parmstrong\.ca
+    proxy_referer_fqdn: someserver.parmstrong.ca
+    proxy_referer_fqdn_match: someserver\.parmstrong\.ca
 
   remote_user: root
 
@@ -23,7 +23,9 @@
       content: |
         # add the following directives
         SSLProxyEngine On
+        Header add Referer {{ proxy_target_fqdn }}
+        RequestHeader edit Referer ^https://{{ proxy_referer_fqdn_match }}/ https://{{ proxy_target_fqdn }}/
+        # RequestHeader set Front-End-Https "On"
         ProxyPass / https://{{ proxy_target_fqdn }}/
         ProxyPassReverse / https://{{ proxy_target_fqdn }}/
-        ProxyPassReverseCookieDomain {{ proxy_target_fqdn }} {{ proxy_referrer_fqdn }}
-        RequestHeader edit Referer ^https://{{ proxy_referrer_fqdn_match }}/ https://{{ proxy_target_fqdn }}/
+        ProxyPassReverseCookieDomain {{ proxy_target_fqdn }} {{ proxy_referer_fqdn }}
