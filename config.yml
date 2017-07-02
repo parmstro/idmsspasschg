@@ -7,10 +7,10 @@
 - hosts: localhost
   vars:
     httpd_port: 80
-    httpd_ssl_port: 443
+    proxy_httpd_ssl_port: 8443
     proxy_target_fqdn: idm.parmstrong.ca
-    proxy_referer_fqdn: someserver.parmstrong.ca
-    proxy_referer_fqdn_match: someserver\.parmstrong\.ca
+    proxy_referer_fqdn: someserver.parmstrong.ca:8443
+    proxy_referer_fqdn_match: someserver\.parmstrong\.ca\:8443
 
   remote_user: root
 
@@ -19,13 +19,36 @@
     blockinfile:
       path: /etc/httpd/conf.d/ssl.conf
       marker: "# {mark} ANSIBLE MANAGED BLOCK"
-      insertbefore: "</VirtualHost>"
       content: |
-        # add the following directives
-        SSLProxyEngine On
-        Header add Referer {{ proxy_target_fqdn }}
-        RequestHeader edit Referer ^https://{{ proxy_referer_fqdn_match }}/ https://{{ proxy_target_fqdn }}/
-        # RequestHeader set Front-End-Https "On"
-        ProxyPass / https://{{ proxy_target_fqdn }}/
-        ProxyPassReverse / https://{{ proxy_target_fqdn }}/
-        ProxyPassReverseCookieDomain {{ proxy_target_fqdn }} {{ proxy_referer_fqdn }}
+        #
+        Listen 443 https
+        SSLPassPhraseDialog exec:/usr/libexec/httpd-ssl-pass-dialog
+        SSLSessionCache         shmcb:/run/httpd/sslcache(512000)
+        SSLSessionCacheTimeout  300
+        SSLRandomSeed startup file:/dev/urandom  256
+        SSLRandomSeed connect builtin
+        SSLCryptoDevice builtin
+        <VirtualHost *:443>
+          ErrorLog logs/ssl_error_log
+          TransferLog logs/ssl_access_log
+          LogLevel info
+          SSLEngine on
+          SSLProtocol all -SSLv2
+          SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA
+          SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+          SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+          <Files ~ "\.(cgi|shtml|phtml|php3?)$">
+              SSLOptions +StdEnvVars
+          </Files>
+          <Directory "/var/www/cgi-bin">
+              SSLOptions +StdEnvVars
+          </Directory>
+          BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+          CustomLog logs/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x %{Referer}i %U \"%r\" %b"
+          # add the following directives
+          SSLProxyEngine On
+          RequestHeader edit Referer ^https://{{ proxy_referer_fqdn_match }}/ https://{{ proxy_target_fqdn }}/
+          ProxyPass / https://{{ proxy_target_fqdn }}/
+          ProxyPassReverse / https://{{ proxy_target_fqdn }}/
+          ProxyPassReverseCookieDomain {{ proxy_target_fqdn }} {{ proxy_referer_fqdn }}
+        </VirtualHost>

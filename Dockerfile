@@ -19,6 +19,8 @@ LABEL maintainedby="Paul Armstrong" \
 # COPY ./source_script_file /tmp/target_script_file
 COPY ./config.yml  /tmp/config.yml
 
+ENV TZ=America/Toronto
+
 RUN yum repolist --disablerepo=* && \
     yum-config-manager --disable \* > /dev/null && \
     yum-config-manager --enable rhel-7-server-rpms --enable epel --enable rhel-7-server-optional-rpms > /dev/null && \
@@ -26,15 +28,16 @@ RUN yum repolist --disablerepo=* && \
     wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     yum -y localinstall epel-release-latest-7.noarch.rpm && \
     yum -y install httpd mod_ssl mod_proxy_html mod_proxy_balancer ansible && \
-    yum -y update
+    yum -y update && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 
-
-RUN ansible-playbook /tmp/config.yml && \
+RUN echo "" > /etc/httpd/conf.d/ssl.conf && \
+    ansible-playbook /tmp/config.yml && \
     cat /etc/httpd/conf.d/ssl.conf
 
 # Expose WebServer ports
 EXPOSE 8443
-EXPOSE 8080
 
 # Start the service
 CMD ["-D", "FOREGROUND"]
