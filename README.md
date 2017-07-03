@@ -5,11 +5,26 @@ A container project to implement the ability to gain access to idm from an exter
 
 ## Current Iteration
 
-Implementing the basic proxy.
+Implementing the basic proxy. The current code allows you to run the container on a host other than the IdM/IPA Server and will manage the proxying of the UI. Users can access all the functionality provided by their access credentials through the UI without restrictions. In other words, a simple proxy. The configuration of IdM at this time prevents running the proxy container on an alternate port on the same server - the source port of the proxy must be 443. 
 
-## Installation 
 
-TBD - basic docker pull. Entry points should start the container appropriately and expose basic ports. Environment should define the proxied and target FQDNs.
+## Requirements
 
+Repositories
+
+rhel-7-server-rpms
+rhel-7-server-optional-rpms
+epel
+
+Base container
+
+registry.access.redhat.com/rhel7:latest
+
+Edit vars in config.yml to reflect your proxy name
+Build the container.
+Ensure your proxy name is resolvable via DNS
+Run the container map external port 443 to container port 443
+
+e.g. sudo docker run -d -h someserver.parmstrong.ca -p 443:443 --name=myidmproxy rhel7idmproxy
 
 
