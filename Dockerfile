@@ -12,7 +12,7 @@ FROM registry.access.redhat.com/rhel7:latest
 
 # its from me
 LABEL maintainedby="Paul Armstrong" \
-      version="0.5" \
+      version="0.6" \
       release-date="2017-06-28"
 
 
@@ -37,7 +37,7 @@ RUN echo "" > /etc/httpd/conf.d/ssl.conf && \
     cat /etc/httpd/conf.d/ssl.conf
 
 # Expose WebServer ports
-EXPOSE 8443
+EXPOSE 443
 
 # Start the service
 CMD ["-D", "FOREGROUND"]

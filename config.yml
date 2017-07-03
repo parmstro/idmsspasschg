@@ -7,10 +7,10 @@
 - hosts: localhost
   vars:
     httpd_port: 80
-    proxy_httpd_ssl_port: 8443
+    proxy_httpd_ssl_port: 443
     proxy_target_fqdn: idm.parmstrong.ca
-    proxy_referer_fqdn: someserver.parmstrong.ca:8443
-    proxy_referer_fqdn_match: someserver\.parmstrong\.ca\:8443
+    proxy_referer_fqdn: someserver.parmstrong.ca
+    proxy_referer_fqdn_match: someserver\.parmstrong\.ca
 
   remote_user: root
 
@@ -28,10 +28,10 @@
         SSLRandomSeed startup file:/dev/urandom  256
         SSLRandomSeed connect builtin
         SSLCryptoDevice builtin
-        <VirtualHost *:443>
+        <VirtualHost _default_:443>
           ErrorLog logs/ssl_error_log
           TransferLog logs/ssl_access_log
-          LogLevel info
+          LogLevel warn
           SSLEngine on
           SSLProtocol all -SSLv2
           SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA
@@ -44,7 +44,7 @@
               SSLOptions +StdEnvVars
           </Directory>
           BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
-          CustomLog logs/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x %{Referer}i %U \"%r\" %b"
+          CustomLog logs/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x %{Referer}i %U %{Cookie}i %{Set-Cookie}o \"%r\" %b"
           # add the following directives
           SSLProxyEngine On
           RequestHeader edit Referer ^https://{{ proxy_referer_fqdn_match }}/ https://{{ proxy_target_fqdn }}/
