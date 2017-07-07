@@ -1,0 +1,11 @@
+[Unit]
+Description=IdM Proxy container
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker start -a myidmproxy
+ExecStop=/usr/bin/docker stop -t 2 myidmproxy
+
+[Install]
+WantedBy=local.target

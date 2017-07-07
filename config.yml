@@ -8,12 +8,21 @@
   vars:
     httpd_port: 80
     proxy_httpd_ssl_port: 443
+    # enter the FQDN of your IPA/IdM Server
     proxy_target_fqdn: idm.parmstrong.ca
+    # enter the FQDN of the URL you are proxying from
     proxy_referer_fqdn: someserver.parmstrong.ca
-    proxy_referer_fqdn_match: someserver\.parmstrong\.ca
+    # set up the match to the referer
+    proxy_referer_fqdn_match: someserver\.parmstrong\.ca    
+    ssl_cert_key_file: /etc/pki/tls/private/localhost.key
+    ssl_cert_file: /etc/pki/tls/certs/localhost.crt
 
   remote_user: root
 
+# TODO: put in task to copy ssl certs to the proper locations and name them
+# we will parameterize SSLCertificateKeyFile and SSLCertificateFile
+# for now we are using the defaults for self signed certs
+#
   tasks:
   - name: Configure httpd server
     blockinfile:
@@ -35,8 +44,8 @@
           SSLEngine on
           SSLProtocol all -SSLv2
           SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA
-          SSLCertificateFile /etc/pki/tls/certs/localhost.crt
-          SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+          SSLCertificateFile {{ ssl_cert_file }}
+          SSLCertificateKeyFile {{ ssl_cert_key_file }}
           <Files ~ "\.(cgi|shtml|phtml|php3?)$">
               SSLOptions +StdEnvVars
           </Files>
