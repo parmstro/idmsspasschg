@@ -14,16 +14,51 @@
     proxy_referer_fqdn: someserver.parmstrong.ca
     # set up the match to the referer
     proxy_referer_fqdn_match: someserver\.parmstrong\.ca    
-    ssl_cert_key_file: /etc/pki/tls/private/localhost.key
-    ssl_cert_file: /etc/pki/tls/certs/localhost.crt
+    ssl_cert_key_file: container_ssl.key
+    ssl_cert_file: container_ssl.crt
 
   remote_user: root
 
-# TODO: put in task to copy ssl certs to the proper locations and name them
-# we will parameterize SSLCertificateKeyFile and SSLCertificateFile
-# for now we are using the defaults for self signed certs
+# copy ssl certs to the proper locations and name them
+# configure the web server
 #
   tasks:
+  - name: stat key
+    stat: 
+      path: /tmp/{{ ssl_cert_key_file }}
+    register: key_stat
+
+  - name: stat cert
+    stat: 
+      path: /tmp/{{ ssl_cert_file }}
+    register: cert_stat
+
+  - name: certs_are_present
+    debug:
+      msg: "Cert File: {{ cert_stat.stat.path }}  Cert Key: {{ key_stat.stat.path }}"
+
+  - name: Move cert key file
+    command: mv /tmp/{{ ssl_cert_key_file }}  /etc/pki/tls/certs/{{ ssl_cert_key_file }}
+    when: key_stat.stat.exists
+
+  - name: Move cert file
+    command: mv /tmp/{{ ssl_cert_file }}  /etc/pki/tls/certs/{{ ssl_cert_file }}
+    when: cert_stat.stat.exists
+
+  - name: Change ownership of key
+    file:
+      path: /etc/pki/tls/certs/{{ ssl_cert_key_file }}
+      owner: root
+      group: root
+      mode: 600
+
+  - name: Change ownership of cert
+    file:
+      path: /etc/pki/tls/certs/{{ ssl_cert_file }}
+      owner: root
+      group: root
+      mode: 600
+
   - name: Configure httpd server
     blockinfile:
       path: /etc/httpd/conf.d/ssl.conf
@@ -44,8 +79,8 @@
           SSLEngine on
           SSLProtocol all -SSLv2
           SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5:!SEED:!IDEA
-          SSLCertificateFile {{ ssl_cert_file }}
-          SSLCertificateKeyFile {{ ssl_cert_key_file }}
+          SSLCertificateFile /etc/pki/tls/certs/{{ ssl_cert_file }}
+          SSLCertificateKeyFile /etc/pki/tls/certs/{{ ssl_cert_key_file }}
           <Files ~ "\.(cgi|shtml|phtml|php3?)$">
               SSLOptions +StdEnvVars
           </Files>

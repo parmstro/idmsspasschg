@@ -12,7 +12,7 @@ FROM registry.access.redhat.com/rhel7:latest
 
 # its from me
 LABEL maintainedby="Paul Armstrong" \
-      version="0.7" \
+      version="0.8" \
       release-date="2017-06-28"
 
 
@@ -20,8 +20,11 @@ LABEL maintainedby="Paul Armstrong" \
 COPY ./config.yml  /tmp/config.yml
 
 # If you want to use custom certs, copy the key and certificate to the container
-# COPY ./container_ssl.key /tmp/container_ssl.key
-# COPY ./container_ssl.crt /tml/container_ssl.crt
+# NOTE: edit the path to these files and ensure that they can be read during build
+# in the REAL WORLD we will do this with persistent volumes and claims
+COPY ./private/container_ssl.key /tmp/container_ssl.key
+COPY ./private/container_ssl.crt /tmp/container_ssl.crt
+
 
 ENV TZ=America/Toronto
 
